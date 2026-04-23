@@ -7,7 +7,7 @@
     <meta name="description" content="Wadul-IT By Budi & Rashel">
     <meta name="author" content="Wadul-IT By Budi & Rashel">
     <link rel="shortcut icon" href="" type="image/x-icon">
-    <link rel="icon" href="" type="image/x-icon">
+    <link rel="icon" href="{{ asset('assets/RS/LOgo RS ONLY.png') }}" type="image/x-icon">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Wadul-IT</title>
 
@@ -266,13 +266,19 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                        <li class="nav-item"> <a class="nav-link" href="{{ url('/') }}">Home</a>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->is('/') ? 'active' : '' }}"
+                                href="{{ url('/') }}">Home</a>
                         </li>
-                        <li class="nav-item "> <a class="nav-link" href="{{ route('laporan.create') }}"
-                                target="">Pengajuan</a>
+
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->is('laporan/create') ? 'active' : '' }}"
+                                href="{{ route('laporan.create') }}">Pengajuan</a>
                         </li>
-                        <li class="nav-item "> <a class="nav-link" href="{{ route('laporan.index') }}"
-                                target="">Cek Laporan</a>
+
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->is('laporan') ? 'active' : '' }}"
+                                href="{{ route('laporan.index') }}">Cek Laporan</a>
                         </li>
                     </ul>
                 </div>
@@ -290,10 +296,11 @@
                             WADUL-IT
                         </h1>
                         <p class="mb-4">Sistem kami mempermudah pengajuan laporan masalah atau permintaan bantuan.
-                            <br>Gunakan tiket, NIK dan NIP, atau nomor HP untuk melacak status laporan Anda dengan cepat dan
+                            <br>Gunakan tiket, NIK dan NIP, atau nomor HP untuk melacak status laporan Anda dengan cepat
+                            dan
                             akurat.
                         </p>
-                        <a type="button" class="btn btn-primary" href="{{ route('laporan.create') }}" target="_blank">
+                        <a type="button" class="btn btn-primary" href="{{ route('laporan.create') }}">
                             Ajukan Laporan<span style="font-size: 14px;" class="ms-2 fas fa-arrow-right"></span>
                         </a>
                     </div>
@@ -392,7 +399,7 @@
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6 service-item">
-                    <a class="text-black" href="{{ route('laporan.create') }}" >
+                    <a class="text-black" href="{{ route('laporan.create') }}">
                         <div class="block"> <span class="colored-box text-center h3 mb-4">01</span>
                             <h3 class="mb-3 service-title">Ajukan Laporan</h3>
                             <p class="mb-0 service-description">Ajukan masalah atau permintaan bantuan dengan mudah
@@ -450,7 +457,8 @@
                                         <div class="content">
                                             <p>Untuk mengajukan masalah atau permintaan bantuan, Anda perlu:</p>
                                             <ul class="text-start d-inline-block">
-                                                <li>Mengisi data diri: <strong>NIK dan NIP, Nama, Nomor HP</strong>.</li>
+                                                <li>Mengisi data diri: <strong>NIK dan NIP, Nama, Nomor HP</strong>.
+                                                </li>
                                                 <li>Memilih <strong>Ruangan</strong> dan <strong>Kategori
                                                         Pengajuan</strong> sesuai kebutuhan.</li>
                                                 <li>Menuliskan <strong>Keterangan</strong> detail tentang masalah Anda.
