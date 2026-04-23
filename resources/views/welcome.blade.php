@@ -547,7 +547,7 @@
                         </li>
                         <li class="list-inline-item me-3">
                             <a title="Explorer Facebook Profile" class="text-black"
-                                href="https://www.facebook.com/rsdkalisatjember" target="_blank">
+                                href="https://www.facebook.com/RsdKalisat" target="_blank">
                                 <i class="fab fa-facebook-f"></i>
                             </a>
                         </li>
