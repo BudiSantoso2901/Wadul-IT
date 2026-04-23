@@ -13,56 +13,80 @@ class ManajemenController extends Controller
 {
     public function index(Request $request)
     {
-        // Mengatur lokalitas Carbon ke bahasa Indonesia
         Carbon::setLocale('id');
 
         if ($request->ajax()) {
-            // Mengambil seluruh data laporan beserta relasinya
-            $laporans = Laporan::with('pelapor', 'ruangan', 'kategori', 'updatedBy', 'updatedBySelesai')
-                ->orderBy('created_at', 'desc') // Urutkan berdasarkan created_at
-                ->get();
+
+            $query = Laporan::with('pelapor', 'ruangan', 'kategori', 'updatedBy', 'updatedBySelesai')
+                ->orderBy('created_at', 'desc');
+
+            // ── Filter Ruangan ──────────────────────────────
+            if ($request->filled('ruangan_id')) {
+                $query->where('ruangan_id', $request->ruangan_id);
+            }
+
+            // ── Filter Range Tanggal (format: "2025-06-01 - 2025-06-30") ──
+            if ($request->filled('range_tanggal')) {
+                $parts = explode(' - ', $request->range_tanggal);
+                if (count($parts) === 2) {
+                    $start = Carbon::createFromFormat('d/m/Y', trim($parts[0]))->startOfDay();
+                    $end   = Carbon::createFromFormat('d/m/Y', trim($parts[1]))->endOfDay();
+                    $query->whereBetween('created_at', [$start, $end]);
+                }
+            }
+
+            // ── Filter Pelapor (search by name) ─────────────
+            if ($request->filled('pelapor')) {
+                $keyword = $request->pelapor;
+                $query->whereHas('pelapor', function ($q) use ($keyword) {
+                    $q->where('nama', 'like', '%' . $keyword . '%');
+                });
+            }
+
+            $laporans = $query->get();
 
             $data = [];
             foreach ($laporans as $laporan) {
-                // Menghitung waktu respons
-                $waktu_diproses = '-'; // Default jika tidak ada perhitungan waktu respons
-                $waktu_selesai_keterangan = ''; // Keterangan waktu selesai jika ada
+                $waktu_diproses           = '-';
+                $waktu_selesai_keterangan = '';
 
-                // Pastikan waktu dibuat dan waktu diproses adalah objek Carbon
-                $created_at = Carbon::parse($laporan->created_at); // Mengonversi created_at menjadi objek Carbon
+                $created_at = Carbon::parse($laporan->created_at);
 
-                // Jika status 'Diproses', hitung waktu respons dari diterima ke diproses
                 if ($laporan->status && $laporan->waktu_diproses) {
-                    $waktu_diproses = Carbon::parse($laporan->waktu_diproses)->diffForHumans($created_at);
-                }
-                if ($laporan->waktu_diproses && $laporan->updated_at) {
-                    // Hitung waktu selesai dari waktu_diproses ke updated_at
-                    $waktu_selesai_keterangan = Carbon::parse($laporan->updated_at)->diffForHumans(Carbon::parse($laporan->waktu_diproses));
+                    $waktu_diproses = Carbon::parse($laporan->waktu_diproses)
+                        ->diffForHumans($created_at);
                 }
 
-                // Menambahkan data ke array
+                if ($laporan->waktu_diproses && $laporan->updated_at) {
+                    $waktu_selesai_keterangan = Carbon::parse($laporan->updated_at)
+                        ->diffForHumans(Carbon::parse($laporan->waktu_diproses));
+                }
+
                 $data[] = [
-                    'id' => $laporan->id,
-                    'nomor_tiket' => $laporan->nomor_tiket,
-                    'pelapor' => $laporan->pelapor->nama,
-                    'ruangan' => $laporan->ruangan->nama,
-                    'kategori' => $laporan->kategori->nama,
-                    'keterangan' => $laporan->keterangan,
-                    'status' => $laporan->status,
-                    'dokumen_pendukung' => $laporan->dokumen_pendukung,
-                    'waktu_diproses' => $waktu_diproses . '<br>' . ' Updated by ' . ($laporan->updatedBy ? $laporan->updatedBy->name : 'Tidak ada'),
-                    'waktu_selesai_keterangan' => $waktu_selesai_keterangan  . '<br>' . ' Updated by ' . ($laporan->updatedBySelesai ? $laporan->updatedBySelesai->name : 'Tidak ada'), // Menambahkan keterangan waktu selesai
-                    'deskripsi' => $laporan->deskripsi,
-                    'created_at' => $laporan->created_at->format('d F Y H:i'),
+                    'id'                       => $laporan->id,
+                    'nomor_tiket'              => $laporan->nomor_tiket,
+                    'pelapor'                  => $laporan->pelapor->nama,
+                    'ruangan'                  => $laporan->ruangan->nama,
+                    'kategori'                 => $laporan->kategori->nama,
+                    'keterangan'               => $laporan->keterangan,
+                    'status'                   => $laporan->status,
+                    'dokumen_pendukung'        => $laporan->dokumen_pendukung,
+                    'waktu_diproses'           => $waktu_diproses . '<br><small>Updated by ' .
+                        ($laporan->updatedBy ? $laporan->updatedBy->name : 'Tidak ada') . '</small>',
+                    'waktu_selesai_keterangan' => $waktu_selesai_keterangan . '<br><small>Updated by ' .
+                        ($laporan->updatedBySelesai ? $laporan->updatedBySelesai->name : 'Tidak ada') . '</small>',
+                    'deskripsi'                => $laporan->deskripsi,
+                    'created_at'               => $laporan->created_at->format('d F Y H:i'),
                 ];
             }
 
-            // Mengembalikan data dalam format JSON
             return response()->json(['data' => $data]);
         } else {
-            // Jika bukan permintaan AJAX, tampilkan data di view
+            // Untuk mengisi dropdown ruangan di filter
+            $ruangans = \App\Models\Ruangan::orderBy('nama')->get();
             $laporans = Laporan::orderBy('created_at', 'desc')->get();
-            return view('admin.dashboard', compact('laporans'));
+
+            return view('admin.dashboard', compact('laporans', 'ruangans'));
         }
     }
 
@@ -187,13 +211,11 @@ class ManajemenController extends Controller
     {
         $SECRET_TOKEN = 'mnsve3hD8m9qLLq6gW8n';
 
-        // Kirim pesan ke nomor WhatsApp
         Http::withHeaders([
-            'X-Auth-Token' => $SECRET_TOKEN,
-            'Content-Type' => 'application/json'
+            'Authorization' => $SECRET_TOKEN
         ])->post('https://api.fonnte.com/send', [
-            'phoneNumbers' => [$phoneNumber],
-            'message' => $message
+            'target' => $phoneNumber,
+            'message' => $message,
         ]);
     }
 }
