@@ -761,9 +761,9 @@
                         data: 'dokumen_pendukung',
                         render: function(data) {
                             if (data) {
-                                return `<a href="/storage/${data}" class="btn-rs-edit" download>
-                                    <i class="fas fa-download" style="font-size:11px;"></i> Unduh
-                                </a>`;
+                                return `<a href="/storage/${data}" target="_blank" class="btn-rs-edit">
+                <i class="fas fa-eye" style="font-size:11px;"></i> Lihat
+            </a>`;
                             }
                             return '<span style="color:#9ca3af;font-size:12px;">-</span>';
                         }
