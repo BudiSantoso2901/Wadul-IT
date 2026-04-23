@@ -54,7 +54,11 @@ class LaporanController extends Controller
             'kategori_id' => $request->kategori_id,
             'keterangan' => $request->keterangan,
             'dokumen_pendukung' => $request->file('dokumen_pendukung')
-                ? $request->file('dokumen_pendukung')->storeAs('dokumen_pendukungs', $nomorTiket . '_' .  uniqid() . '.' . $request->file('dokumen_pendukung')->getClientOriginalExtension())
+                ? $request->file('dokumen_pendukung')->storeAs(
+                    'dokumen_pendukungs',
+                    $nomorTiket . '_' . uniqid() . '.' . $request->file('dokumen_pendukung')->getClientOriginalExtension(),
+                    'public'
+                )
                 : null,
             'status' => 'Diterima',
         ]);
