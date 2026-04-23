@@ -27,7 +27,7 @@ class LaporanController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:255',
-            'nik' => 'required|string|size:16',
+            'nik' => 'required|string|',
             'nomor_hp' => 'required|string|max:13',
             'ruangan_id' => 'required|exists:ruangans,id',
             'kategori_id' => 'required|exists:kategoris,id',
