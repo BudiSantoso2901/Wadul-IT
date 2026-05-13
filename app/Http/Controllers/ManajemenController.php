@@ -43,6 +43,10 @@ class ManajemenController extends Controller
                 });
             }
 
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+
             $laporans = $query->get();
 
             $data = [];

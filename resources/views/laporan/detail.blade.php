@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
-    <meta name="description" content="Wadul-IT By Budi & Rashel">
-    <meta name="author" content="Wadul-IT By Budi & Rashel">
+    <meta name="description" content="Wadul-IT By IT">
+    <meta name="author" content="Wadul-IT By IT">
     <link rel="icon" href="{{ asset('assets/RS/LOgo RS ONLY.png') }}" type="image/x-icon">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Wadul-IT</title>
